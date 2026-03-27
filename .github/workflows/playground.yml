@@ -1,0 +1,63 @@
+name: YAML Playground
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Basic execution
+      - name: Step 1 - Hello
+        run: echo "Hello from GitHub Actions"
+
+      # 2. Multiple commands
+      - name: Step 2 - Multi command
+        run: |
+          echo "Line 1"
+          echo "Line 2"
+          pwd
+          ls -la
+
+      # 3. Environment variables
+      - name: Step 3 - Env vars
+        env:
+          NAME: madmax
+        run: echo "Hello $NAME"
+
+      # 4. Default GitHub variables
+      - name: Step 4 - GitHub context
+        run: |
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF"
+          echo "Actor: $GITHUB_ACTOR"
+
+      # 5. Create + use files
+      - name: Step 5 - File operations
+        run: |
+          echo "Some data" > test.txt
+          cat test.txt
+
+      # 6. Step-to-step data passing
+      - name: Step 6 - Set output
+        id: step1
+        run: echo "value=42" >> $GITHUB_OUTPUT
+
+      - name: Step 7 - Use output
+        run: echo "Value is ${{ steps.step1.outputs.value }}"
+
+      # 7. Conditional execution
+      - name: Step 8 - Run only on main
+        if: github.ref == 'refs/heads/main'
+        run: echo "You're on main branch"
+
+      # 8. Intentional failure
+      - name: Step 9 - Break it
+        continue-on-error: true
+        run: exit 1
+
+      # 9. Matrix (parallel simulation)
+      - name: Step 10 - Matrix demo
+        run: echo "Matrix comes at job level (next experiment)"
