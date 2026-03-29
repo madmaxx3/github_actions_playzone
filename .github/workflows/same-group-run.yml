@@ -52,14 +52,6 @@ jobs:
           echo "Length:"
           echo "${#DOCKER_TOKEN}"
 
-      # 💥 INTENTIONAL TIMEOUT STEP
-      - name: Simulate hang (THIS WILL FAIL)
-        timeout-minutes: 1
-        run: |
-          echo "Starting long task..."
-          sleep 120
-          echo "You will NEVER see this"
-
       # 🔥 Create file (won’t run)
       - name: Step - Create file
         run: echo "This will not execute" > data.txt
