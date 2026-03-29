@@ -1,0 +1,80 @@
+name: YAML Playground
+
+on:
+  push:
+  workflow_dispatch:
+
+# 🔒 WORKFLOW-LEVEL CONCURRENCY
+concurrency:
+  group: MY_SPECIAL_GROUP
+  cancel-in-progress: true
+
+# 🌍 1. Workflow-level ENV (global)
+env:
+  GLOBAL_ENV: "I am global"
+
+jobs:
+  explore_1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    # 🧱 Job-level ENV
+    env:
+      JOB_ENV: "I am job level"
+
+    steps:
+      # 🔍 Machine details (Job 1)
+      - name: Show machine details (Job 1)
+        run: |
+          echo "=== JOB 1 MACHINE INFO ==="
+          hostname
+          uname -a
+
+      # 🌍 Access global + job env
+      - name: Step - Print ENV hierarchy
+        run: |
+          echo "GLOBAL_ENV: $GLOBAL_ENV"
+          echo "JOB_ENV: $JOB_ENV"
+
+      # 🧩 Step-level ENV
+      - name: Step with local env
+        env:
+          STEP_ENV: "I am step level"
+        run: |
+          echo "STEP_ENV: $STEP_ENV"
+
+      # 🔐 Secrets usage
+      - name: Use secrets safely
+        env:
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          echo "Secret exists but masked"
+          echo "Length:"
+          echo "${#DOCKER_TOKEN}"
+
+      # 💥 INTENTIONAL TIMEOUT STEP
+      - name: Simulate hang (THIS WILL FAIL)
+        timeout-minutes: 1
+        run: |
+          echo "Starting long task..."
+          sleep 120
+          echo "You will NEVER see this"
+
+      # 🔥 Create file (won’t run)
+      - name: Step - Create file
+        run: echo "This will not execute" > data.txt
+
+      # Upload artifact (won’t run)
+      - name: Step - Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-uploadable-file
+          path: data.txt
+
+  process_1:
+    runs-on: ubuntu-latest
+    needs: explore_1
+
+    steps:
+      - name: This will not run
+        run: echo "Skipped due to failure"
